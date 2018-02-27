@@ -46,7 +46,7 @@ def main():
            VALUES ({})'''.format(template)
 
     for index, row in df.iterrows():
-    cursor.execute(query=query, vars=row)
+        cursor.execute(query=query, vars=row)
 
     conn.commit()
 
