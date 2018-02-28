@@ -56,7 +56,7 @@ def uploadlog_tosql(logentry):
 
 
 def main():
-    page=22
+    page=1
     try:
         geo, georesponse=get_response(page)
         df=pd.DataFrame(geo['results']['geolocations'],index=None).T
