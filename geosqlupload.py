@@ -18,7 +18,7 @@ def get_response(page):
     geo_url='https://rest.tsheets.com/api/v1/geolocations'
     params = {'modified_since': date, 'page': page}
     geo_response=requests.get(geo_url, headers=headers, params=params)
-    geo=json.loads(geo_response.text)
+    geo=geo_response.json()
     return geo, geo_response
 
 def uploaddf_tosql(df, logentry):
@@ -52,12 +52,19 @@ def uploaddf_tosql(df, logentry):
 
 def main():
     page=1
-    geo, georesponse=get_response(page)
-    df=pd.DataFrame(geo['results']['geolocations'],index=None).T
+    try:
+        geo, georesponse=get_response(page)
+        df=pd.DataFrame(geo['results']['geolocations'],index=None).T
+    except:
+         geo, georesponse=get_response(page)
+         df=pd.DataFrame(geo['results']['geolocations'],index=None).T
 
     while geo['more']==True:
         page+=1
-        geo, georesponse=get_response(page)
+        try:
+            geo, georesponse=get_response(page)
+        except:
+            geo, georesponse=get_response(page)
         df=pd.DataFrame(geo['results']['geolocations'],index=None).T
         logentry=[page, int(str(georesponse)[11:14]), datetime.datetime.now()]
         uploaddf_tosql(df, logentry)
