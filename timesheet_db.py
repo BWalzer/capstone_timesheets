@@ -48,8 +48,8 @@ def insert_to_DB(db_name, username, host, password,timesheets):
     for _, timesheet in timesheets.iterrows():
         try:
             cursor.execute(query=query, vars=timesheet)
-        except psycopg2.IntegrityError:
-            print ('duplicate key detect')
+        except psycopg2.IntegrityError as error:
+            print (error)
             duprow_count+=1
             conn.rollback()
         conn.commit()
