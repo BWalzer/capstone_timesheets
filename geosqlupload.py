@@ -61,3 +61,6 @@ def main():
         df=pd.DataFrame(geo['results']['geolocations'],index=None).T
         logentry=[page, int(str(georesponse)[11:14]), datetime.datetime.now()]
         uploaddf_tosql(df, logentry)
+
+if __name__ == '__main__':
+    main()
