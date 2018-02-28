@@ -42,8 +42,8 @@ def uploaddf_tosql(df):
         cursor.execute(query=query, vars=row)
 
     conn.commit()
+    conn.close()
 
-    
 def uploadlog_tosql(logentry):
     cursor = conn.cursor()
     template = ', '.join(['%s'] * len(logentry))
@@ -52,11 +52,11 @@ def uploadlog_tosql(logentry):
                VALUES ({})'''.format(template)
 
     cursor.execute(query=querylog, vars=logentry)
-
     conn.commit()
+    conn.close()
 
 def main():
-    page=1
+    page=22
     try:
         geo, georesponse=get_response(page)
         df=pd.DataFrame(geo['results']['geolocations'],index=None).T
@@ -75,7 +75,3 @@ def main():
         print(logentry)
         uploaddf_tosql(df)
         uploadlog_tosql(logentry)
-
-
-if __name__ == '__main__':
-    main()
