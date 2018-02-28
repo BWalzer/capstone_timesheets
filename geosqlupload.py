@@ -41,6 +41,9 @@ def uploaddf_tosql(df):
     for index, row in df.iterrows():
         cursor.execute(query=query, vars=row)
 
+    conn.commit()
+
+    
 def uploadlog_tosql(logentry):
     cursor = conn.cursor()
     template = ', '.join(['%s'] * len(logentry))
