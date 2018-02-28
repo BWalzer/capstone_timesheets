@@ -9,6 +9,9 @@ def clean_to_df(data):
     timesheet['start_time']=timesheet['start']
     timesheet['sheet_id']=timesheet['id']
     timesheet['timezone']=timesheet['tz'].astype('int')
+    timesheet['customfields']=timesheet['customfields'].astype('str')
+    timesheet['end_time']=timesheet['end_time'].replace('','1900-01-01T01:01:01-01:01')
+    timesheet['start_time']=timesheet['start_time'].replace('','1900-01-01T01:01:01-01:01')
     timesheet_df=timesheet[['date','duration','end_time','start_time',
     'sheet_id','jobcode_id','last_modified','location','locked','notes',
     'on_the_clock','type','timezone','tz_str','user_id','customfields','attached_files']]
@@ -35,12 +38,13 @@ def insert_to_DB(db_name, username, host, password,timesheet):
            sheet_id,jobcode_id,last_modified,location,locked,notes,
            on_the_clock,type,timezone,tz_str,user_id,customfields,attached_files)
                VALUES ({})'''.format(template)
-
+    duprow_count=0
     for _, timesheet in timesheet.iterrows():
         try:
             cursor.execute(query=query, vars=timesheet)
         except psycopg2.IntegrityError:
             print ('duplicate key detect')
+            duprow_count+=1
             conn.rollback()
         conn.commit()
 
@@ -53,3 +57,5 @@ if __name__=="__main__":
     password = os.environ['CAPSTONE_DB_PASSWORD']
     auth_token = os.environ['CAPSTONE_API_TOKEN']
     headers = {'Authorization': auth_token}
+    timesheet=request_data_API(auth_token,headers)
+    insert_to_DB(db_name, username, host, password,timesheet)
