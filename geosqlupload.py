@@ -42,7 +42,7 @@ def uploaddf_tosql(df):
         cursor.execute(query=query, vars=row)
 
     conn.commit()
-    conn.close()
+
 
 def uploadlog_tosql(logentry):
     cursor = conn.cursor()
@@ -53,7 +53,7 @@ def uploadlog_tosql(logentry):
 
     cursor.execute(query=querylog, vars=logentry)
     conn.commit()
-    conn.close()
+
 
 def main():
     page=22
@@ -75,6 +75,8 @@ def main():
         print(logentry)
         uploaddf_tosql(df)
         uploadlog_tosql(logentry)
+
+    conn.close()
 
 if __name__ == '__main__':
     main()
