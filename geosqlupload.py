@@ -72,3 +72,7 @@ def main():
         print(logentry)
         uploaddf_tosql(df)
         uploadlog_tosql(logentry)
+
+
+if __name__ == '__main__':
+    main()
