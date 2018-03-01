@@ -17,21 +17,21 @@ def clean_to_df(data):
     'on_the_clock','type','timezone','tz_str','user_id','customfields','attached_files']]
     return timesheet_df
 
-def request_data_API(auth_token,headers):
-    page=2
-    url = 'https://est.tsheets.com/api/v1/timesheets?start_date=2017-01-01&page=1'
-    print('requesting page 1')
-    data = requests.get(url, headers=headers)
-    timesheet=clean_to_df(data)
-    while True:
-        print('requesting page {}'.format(page))
-        url = 'https://est.tsheets.com/api/v1/timesheets?start_date=2017-01-01&page={}'.format(page)
+def request_data_API(auth_token,headers,page):
+    print('requesting page {}'.format(page))
+    url = 'https://est.tsheets.com/api/v1/timesheets?start_date=2017-01-01&page={}'.format(page)
+
+    attempts = 0
+    while attempts < 5:
         data = requests.get(url, headers=headers)
-        timesheet_df=clean_to_df(data)
-        timesheet = pd.concat([timesheet, timesheet_df])
-        page += 1
-        if data.json()['more']==False:
+        attempts += 1
+        if data.status_code == 200:
             break
+        print('\t bad status code: {}. attempt {} of 5'.format(data.status_code, attempts))
+        time.sleep(5)
+
+    timesheet_df=clean_to_df(data)
+    timesheet = pd.concat([timesheet, timesheet_df])
     return timesheet
 
 def insert_to_DB(db_name, username, host, password,timesheets):
@@ -50,11 +50,21 @@ def insert_to_DB(db_name, username, host, password,timesheets):
             cursor.execute(query=query, vars=timesheet)
         except psycopg2.IntegrityError as error:
             print (error)
+            print (timesheet[14], timesheet[0])
             duprow_count+=1
             conn.rollback()
         conn.commit()
     conn.close()
-    print (duprow_count)
+
+
+def request_API_insert_DB(db_name, username, host, password,auth_token,headers)
+    page=1
+    while True:
+        timesheets=request_data_API(auth_token,headers,page)
+        insert_to_DB(db_name, username, host, password,timesheets)
+        page += 1
+        if data.json()['more']==False:
+            break
 
 if __name__=="__main__":
     db_name = os.environ['CAPSTONE_DB_NAME']
@@ -63,5 +73,3 @@ if __name__=="__main__":
     password = os.environ['CAPSTONE_DB_PASSWORD']
     auth_token = os.environ['CAPSTONE_API_TOKEN']
     headers = {'Authorization': auth_token}
-    timesheet=request_data_API(auth_token,headers)
-    insert_to_DB(db_name, username, host, password,timesheet)
