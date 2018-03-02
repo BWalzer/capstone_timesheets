@@ -23,7 +23,7 @@ def request_page(page_number, header):
 
 def upload_to_s3(response, bucket_name, s3_client, page_number, today):
 
-    path = 'data/customfields/{}_page_{}.json'.format(today, page_number)
+    path = 'data/customfields/{}_page={}.json'.format(today, page_number)
     s3_client.put_object(Bucket=bucket_name, Key=path, Body=response.content)
 
 
