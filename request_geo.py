@@ -6,9 +6,12 @@ import time
 import datetime
 import boto3
 
+#change when you are not doing a mass pull
+date='2000-08-01T12:00:00-06:00'
+
 def request_page(page_number, header):
     geo_url='https://rest.tsheets.com/api/v1/geolocations'
-    params = {'modified_since': date, 'page': page}
+    params = {'modified_since': date, 'page': page_number}
     print('requesting employees page {}'.format(page_number))
 
     attempts = 0
