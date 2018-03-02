@@ -28,6 +28,15 @@ def create_dataframe(json_file):
     employees['employee_id'] = employees['id']
     employees.drop(columns=['id'], inplace=True)
 
+    employees['permissions'] = employees['permissions'].astype(str)
+    employees['pto_balances'] = employees['pto_balances'].astype(str)
+
+    employees['created'] = employees['created'].apply(lambda x: None if (x == '0000-00-00' or not x) else x)
+    employees['last_active'] = employees['last_active'].apply(lambda x: None if (x == '0000-00-00' or not x) else x)
+    employees['last_modified'] = employees['last_modified'].apply(lambda x: None if (x == '0000-00-00' or not x) else x)
+    employees['term_date'] = employees['term_date'].apply(lambda x: None if (x == '0000-00-00' or not x) else x)
+    employees['hire_date'] = employees['hire_date'].apply(lambda x: None if (x == '0000-00-00' or not x) else x)
+
     return employees
 
 def upload_to_db(conn, employees, query):
@@ -66,11 +75,11 @@ def main():
         query = '''INSERT INTO employees
                (active, approved_to, client_url, company_name, created,
                       customfields, email, email_verified, employee_number, exempt,
-                      first_name, group_id, hire_date, id, last_active,
-                      last_modified, last_name, manager_of_group_ids, mobile_number,
-                      pay_interval, pay_rate, payroll_id, permissions,
-                      profile_image_url, pto_balances, require_password_change,
-                      salaried, submitted_to, term_date, username)
+                      first_name, group_id, hire_date, last_active, last_modified,
+                      last_name, manager_of_group_ids, mobile_number, pay_interval,
+                      pay_rate, payroll_id, permissions, profile_image_url,
+                      pto_balances, require_password_change, salaried, submitted_to,
+                      term_date, username, employee_id)
                    VALUES ({})'''.format(template)
 
         upload_to_db(conn, employees, query)
