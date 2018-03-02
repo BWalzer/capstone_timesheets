@@ -30,9 +30,8 @@ def request_data_API(auth_token,headers,page):
         print('\t bad status code: {}. attempt {} of 5'.format(data.status_code, attempts))
         time.sleep(5)
 
-    timesheet_df=clean_to_df(data)
-    timesheet = pd.concat([timesheet, timesheet_df])
-    return timesheet
+    timesheets=clean_to_df(data)
+    return timesheets,data
 
 def insert_to_DB(db_name, username, host, password,timesheets):
     conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
@@ -57,10 +56,10 @@ def insert_to_DB(db_name, username, host, password,timesheets):
     conn.close()
 
 
-def request_API_insert_DB(db_name, username, host, password,auth_token,headers)
+def request_API_insert_DB(db_name, username, host, password,auth_token,headers):
     page=1
     while True:
-        timesheets=request_data_API(auth_token,headers,page)
+        timesheets,data=request_data_API(auth_token,headers,page)
         insert_to_DB(db_name, username, host, password,timesheets)
         page += 1
         if data.json()['more']==False:
@@ -73,3 +72,4 @@ if __name__=="__main__":
     password = os.environ['CAPSTONE_DB_PASSWORD']
     auth_token = os.environ['CAPSTONE_API_TOKEN']
     headers = {'Authorization': auth_token}
+    request_API_insert_DB(db_name, username, host, password,auth_token,headers)
