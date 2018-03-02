@@ -6,10 +6,8 @@ import time
 import datetime
 import boto3
 
-#change when you are not doing a mass pull
-date='2000-08-01T12:00:00-06:00'
 
-def request_page(page_number, header):
+def request_page(page_number, header, since_date):
     geo_url='https://rest.tsheets.com/api/v1/geolocations'
     params = {'modified_since': date, 'page': page_number}
     print('requesting employees page {}'.format(page_number))
@@ -32,7 +30,7 @@ def upload_to_s3(response, bucket_name, s3_client, page_number, today):
     s3_client.put_object(Bucket=bucket_name, Key=path, Body=response.content)
 
 
-def main():
+def main(since_date):
 
     auth_token = os.environ['CAPSTONE_API_TOKEN']
     bucket_name = os.environ['CAPSTONE_BUCKET']
@@ -43,7 +41,7 @@ def main():
 
     page_number = 1
     while True:
-        status, response = request_page(page_number, header)
+        status, response = request_page(page_number, header, since_date)
 
         print('\t has more: {}'.format(response.json()['more']))
         if status: # good status, continue with data uploading
@@ -56,4 +54,5 @@ def main():
 
 
 if __name__ == '__main__':
+    since_date='2000-08-01T12:00:00-06:00'
     main()
