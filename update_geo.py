@@ -25,13 +25,16 @@ conn = psycopg2.connect(database=db_name, user=username, host=host, password=pas
 today = str(datetime.date.today())
 
 #need to edit to get one object at a time and the correct file name
+#reference date in the filename
+
+
 def get_file_from_s3(filename):
     s3 = boto3.resource('s3')
     bucket_name = os.environ['CAPSTONE_BUCKET']
     bucket = s3.Bucket(bucket_name)
-    bucket.download_file(filename)
+    obj=bucket.download_file(filename)
 
-    geo_response = obj.get()['Body'].read() 
+    geo_response = obj.get()['Body'].read()
     geo=json.loads(geo_response.text)
     df=pd.DataFrame(geo['results']['geolocations'],index=None).T
 
@@ -40,7 +43,6 @@ def get_file_from_s3(filename):
 #for periodic uploading
 def periodic_uploaddf_tosql(df):
     cursor = conn.cursor()
-
     template = ', '.join(['%s'] * len(df.columns))
 
     #table already created with constraints
@@ -70,8 +72,8 @@ def uploadlog_tosql(logentry):
 def main():
     page=1
     try:
-        geo, georesponse=get_files_from_s3(path)
-        logentry=[page, int(str(georesponse)[11:14]), datetime.datetime.now()]
+        df=get_files_from_s3(path##edit reference for path)
+        logentry=[page, datetime.datetime.now()]
         print(logentry)
         uploaddf_tosql(df)
         uploadlog_tosql(logentry)
