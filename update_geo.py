@@ -24,16 +24,16 @@ password = os.environ['CAPSTONE_DB_PASSWORD']
 conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
 today = str(datetime.date.today())
 
-
-def get_files_from_s3(path):
+#need to edit to get one object at a time and the correct file name
+def get_file_from_s3(filename):
     s3 = boto3.resource('s3')
     bucket_name = os.environ['CAPSTONE_BUCKET']
     bucket = s3.Bucket(bucket_name)
-    for obj in bucket.objects.all():
-        key = obj.key
-        body = obj.get()['Body'].read()
-        geo=json.loads(geo_response.text)
-        df=pd.DataFrame(geo['results']['geolocations'],index=None).T
+    bucket.download_file(filename)
+
+    geo_response = obj.get()['Body'].read() 
+    geo=json.loads(geo_response.text)
+    df=pd.DataFrame(geo['results']['geolocations'],index=None).T
 
     return df
 

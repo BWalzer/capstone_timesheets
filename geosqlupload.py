@@ -10,7 +10,9 @@ import requests
 import time
 import datetime
 
-auth_token = os.environ['CAPSTONE_TOKEN']
+#This is a script for mass uploading to all geolocation data
+
+auth_token = os.environ['CAPSTONE_API_TOKEN']
 headers = {'Authorization': auth_token}
 
 db_name = os.environ['CAPSTONE_DB_NAME']
@@ -18,6 +20,14 @@ host = os.environ['CAPSTONE_DB_HOST']
 username = os.environ['CAPSTONE_DB_USERNAME']
 password = os.environ['CAPSTONE_DB_PASSWORD']
 conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
+
+today = str(datetime.date.today())
+
+def upload_to_s3(response, bucket_name, s3_client, page_number, today):
+
+    path = 'data/jobcodes/{}_page_{}.json'.format(today, page_number)
+    s3_client.put_object(Bucket=bucket_name, Key=path, Body=response.content)
+
 
 def get_response(page):
     date='2000-08-01T12:00:00-06:00'
@@ -27,7 +37,8 @@ def get_response(page):
     geo=json.loads(geo_response.text)
     return geo, geo_response
 
-def uploaddf_tosql(df):
+#for mass uploading
+def mass_uploaddf_tosql(df):
     cursor = conn.cursor()
 
     template = ', '.join(['%s'] * len(df.columns))
@@ -35,14 +46,12 @@ def uploaddf_tosql(df):
     #table already created with constraints
     query = '''INSERT INTO geo
        (accuracy, altitude, created, device_identifier, heading,
-       geo_id, latitude, longitude, source, speed, employee_id)
+       geo_id, latitude, longitude, source, speed, employee_id, )
            VALUES ({})'''.format(template)
 
     for index, row in df.iterrows():
         cursor.execute(query=query, vars=row)
-
     conn.commit()
-
 
 def uploadlog_tosql(logentry):
     cursor = conn.cursor()
@@ -77,6 +86,8 @@ def main():
         uploadlog_tosql(logentry)
 
     conn.close()
+
+
 
 if __name__ == '__main__':
     main()
