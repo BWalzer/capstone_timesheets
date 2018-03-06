@@ -41,13 +41,13 @@ def get_response(page):
 def mass_uploaddf_tosql(df):
     cursor = conn.cursor()
 
-    template = ', '.join(['%s'] * len(df.columns))
+    template = ', '.join(['%s'] * len(df.columns+1))
 
     #table already created with constraints
     query = '''INSERT INTO geo
        (accuracy, altitude, created, device_identifier, heading,
-       geo_id, latitude, longitude, source, speed, employee_id, )
-           VALUES ({})'''.format(template)
+       geo_id, latitude, longitude, source, speed, employee_id, last_updated)
+           VALUES ({})'''.format(template, today)
 
     for index, row in df.iterrows():
         cursor.execute(query=query, vars=row)

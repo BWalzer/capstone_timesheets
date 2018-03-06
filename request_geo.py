@@ -9,7 +9,7 @@ import boto3
 
 def request_page(page_number, header, since_date):
     geo_url='https://rest.tsheets.com/api/v1/geolocations'
-    params = {'modified_since': date, 'page': page_number}
+    params = {'modified_since': since_date, 'page': page_number}
     print('requesting employees page {}'.format(page_number))
 
     attempts = 0
@@ -55,4 +55,4 @@ def main(since_date):
 
 if __name__ == '__main__':
     since_date='2000-08-01T12:00:00-06:00'
-    main()
+    main(since_date)
