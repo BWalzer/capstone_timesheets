@@ -1,15 +1,8 @@
-import pandas as pd
-import pandas as pd
-import psycopg2
 import os
-import io
-import multiprocessing
-import os
-import json
 import requests
 import time
 import datetime
-
+import boto3
 #This is a script for mass uploading to all geolocation data
 
 def request_page(page_number, header, last_mod_date):
@@ -19,7 +12,7 @@ def request_page(page_number, header, last_mod_date):
 
     attempts = 0
     while attempts < 5:
-        response = requests.get(geo_url, headers=headers, params=params)
+        response = requests.get(geo_url, headers=header, params=params)
         attempts += 1
         if response.status_code == 200:
             return True, response
