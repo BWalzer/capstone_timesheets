@@ -43,10 +43,10 @@ def upload_to_db(conn, employees, query):
     print('\t uploading to dataframe')
     cursor = conn.cursor()
 
-    for _, jobcode in employees.iterrows():
+    for _, employee in employees.iterrows():
         print('\t\t uploading row')
         try:
-            cursor.execute(query=query, vars=jobcode)
+            cursor.execute(query=query, vars=employee)
         except psycopg2.IntegrityError as error:
             print(error)
             conn.rollback()
@@ -68,7 +68,7 @@ def main():
 
     for file_path in file_paths:
         json_file = get_json_file(s3_client, bucket_name, file_path)
-
+        request_date = file_path[15:25]
         employees = create_dataframe(json_file)
 
         template = ', '.join(['%s'] * len(employees.columns))
@@ -79,8 +79,26 @@ def main():
                       last_name, manager_of_group_ids, mobile_number, pay_interval,
                       pay_rate, payroll_id, permissions, profile_image_url,
                       pto_balances, require_password_change, salaried, submitted_to,
-                      term_date, username, employee_id)
-                   VALUES ({})'''.format(template)
+                      term_date, username, employee_id, last_updated)
+                   VALUES ({template}, '{last_updated}')
+                   ON CONFLICT(employee_id) DO
+                   UPDATE SET
+                       active = excluded.active, approved_to = excluded.approved_to,
+                       client_url = excluded.client_url, company_name = excluded.company_name,
+                       created = excluded.created, customfields = excluded.customfields,
+                       email = excluded.email, email_verified = excluded.email_verified,
+                       employee_number = excluded.employee_number, exempt = excluded.exempt,
+                       first_name = excluded.first_name, group_id = excluded.group_id,
+                       hire_date = excluded.hire_date, last_active = excluded.last_active,
+                       last_modified = excluded.last_modified, last_name = excluded.last_name,
+                       manager_of_group_ids = excluded.manager_of_group_ids,
+                       mobile_number = excluded.mobile_number, pay_interval = excluded.pay_interval,
+                       pay_rate = excluded.pay_rate, payroll_id = excluded.payroll_id,
+                       permissions = excluded.permissions, profile_image_url = excluded.profile_image_url,
+                       pto_balances = excluded.pto_balances, require_password_change = excluded.require_password_change,
+                       salaried = excluded.salaried, submitted_to = excluded.submitted_to,
+                       term_date = excluded.term_date, username = excluded.username,
+                       employee_id = excluded.employee_id, last_updated = excluded.last_updated'''.format(template=template, last_updated=str(request_date))
 
         upload_to_db(conn, employees, query)
 
