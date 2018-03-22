@@ -28,7 +28,6 @@ def upload_to_s3(response, bucket_name, s3_client, page_number, today):
 
 
 def main():
-
     auth_token = os.environ['CAPSTONE_API_TOKEN']
     bucket_name = os.environ['CAPSTONE_BUCKET']
     header = {'Authorization': auth_token}

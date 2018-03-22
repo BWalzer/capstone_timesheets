@@ -8,6 +8,7 @@ import psycopg2
 
 def request_page(page_number, header, last_updated):
     url = 'https://rest.tsheets.com/api/v1/users?active=both&page={}&modified_since={}'.format(page_number, last_updated)
+    print('url: {}'.format(url))
     print('requesting employees page {}'.format(page_number))
 
     attempts = 0
@@ -47,8 +48,8 @@ def main():
     today = str(datetime.date.today())
 
     cursor.execute('SELECT MAX(last_updated) FROM employees')
-    last_updated = cursor.fetchall()[0]
-    
+    last_updated = str(cursor.fetchall()[0][0].date())
+    print(type(last_updated))
     page_number = 1
     while True:
         status, response = request_page(page_number, header, last_updated)
