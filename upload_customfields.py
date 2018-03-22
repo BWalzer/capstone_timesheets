@@ -22,23 +22,23 @@ def get_json_file(s3_client, bucket_name, file_path):
     return json_file
 
 def create_dataframe(json_file):
-    print('\t creating dataframe')
-    customfields = pd.DataFrame(json_file['results']['customfields']).T
+    print('\t creating customfield items dataframe')
+    customfield_items = pd.DataFrame(json_file['results']['customfielditems']).T
 
-    customfields['customfield_id'] = customfields['id']
-    customfields.drop(columns=['id'], inplace=True)
+    customfield_items['customfield_item_id'] = customfield_items['id']
+    customfield_items.drop(columns=['id'], inplace=True)
 
 
-    return customfields
+    return customfield_items
 
-def upload_to_db(conn, customfields, query):
+def upload_to_db(conn, customfield_items, query):
     print('\t uploading to dataframe')
     cursor = conn.cursor()
 
-    for _, customfield in customfields.iterrows():
+    for _, customfield_item in customfield_items.iterrows():
         print('\t\t uploading row')
         try:
-            cursor.execute(query=query, vars=customfield)
+            cursor.execute(query=query, vars=customfield_item)
         except psycopg2.IntegrityError as error:
             print(error)
             conn.rollback()
@@ -56,30 +56,20 @@ def main():
     conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
     s3_client = boto3.client('s3')
 
-    file_paths = get_file_paths(s3_client, bucket_name, prefix='data/customfields/')
+    file_paths = get_file_paths(s3_client, bucket_name, prefix='data/customfield_items/')
 
     for file_path in file_paths:
         json_file = get_json_file(s3_client, bucket_name, file_path)
-        request_date = file_path[18:28]
-        customfields = create_dataframe(json_file)
 
-        template = ', '.join(['%s'] * len(customfields.columns))
-        query = '''INSERT INTO customfields
-                      (active, applies_to, created, last_modified, name,
-                      regex_filter, required, required_customfields, short_code,
-                      type, ui_preference, customfield_id, last_updated)
-                   VALUES ({template}, '{last_updated}')
-                   ON CONFLICT(customfield_id) DO
-                   UPDATE SET
-                      active = excluded.active, applies_to = excluded.applies_to,
-                      created = excluded.created, last_modified = excluded.last_modified,
-                      name = excluded.name, regex_filter = excluded.regex_filter,
-                      required = excluded.required, required_customfields = excluded.required_customfields,
-                      short_code = excluded.short_code, type = excluded.type,
-                      ui_preference = excluded.ui_preference, customfield_id = excluded.customfield_id,
-                      last_updated = excluded.last_updated'''.format(template=template, last_updated=str(request_date))
+        customfield_items = create_dataframe(json_file)
 
-        upload_to_db(conn, customfields, query)
+        template = ', '.join(['%s'] * len(customfield_items.columns))
+        query = '''INSERT INTO customfield_items
+               (active, customfield_id, last_modified, name,
+                      required_customfields, short_code, customfield_item_id)
+                   VALUES ({})'''.format(template)
+
+        upload_to_db(conn, customfield_items, query)
 
         s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
