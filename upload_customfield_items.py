@@ -65,14 +65,16 @@ def main():
     if file_paths: # files found, no problems
         for file_path in file_paths:
             json_file = get_json_file(s3_client, bucket_name, file_path)
+            request_date = file_path[23:33]
 
-            if json_file['results']['customfields'] != []: # check for empty json
+            if json_file['results']['customfielditems'] != []: # check for empty json
                 customfield_items = create_dataframe(json_file)
 
                 template = ', '.join(['%s'] * len(customfield_items.columns))
-                query = '''INSERT INTO customfield_items
+                query = ('''INSERT INTO customfield_items
                               (active, customfield_id, last_modified, name,
-                              required_customfields, short_code, customfield_item_id)
+                              required_customfields, short_code, customfield_item_id,
+                              last_updated)
                            VALUES ({template}, '{date}')
                            ON CONFLICT(customfield_item_id) DO
                            UPDATE SET
@@ -80,8 +82,9 @@ def main():
                               last_modified = excluded.last_modified, name = excluded.name,
                               required_customfields = excluded.required_customfields,
                               short_code = excluded.short_code,
-                              customfield_item_id = excluded.customfield_item_id'''
-                              .format(template=template, date=str(request_date))
+                              customfield_item_id = excluded.customfield_item_id,
+                              last_updated = excluded.last_updated'''
+                              .format(template=template, date=str(request_date)))
 
                 upload_to_db(conn, customfield_items, query)
 
