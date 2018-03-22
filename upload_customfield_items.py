@@ -9,6 +9,10 @@ def get_file_paths(s3_client, bucket_name, prefix):
     print('\t getting all file_paths')
     bucket_contents = s3_client.list_objects(Bucket=bucket_name, Prefix=prefix)
 
+    if not 'Contents' in bucket_contents.keys(): # no files in the bucket
+        print('\t\t no files found in the bucket path')
+        return False
+
     file_paths = [x['Key'] for x in bucket_contents['Contents']]
 
     return file_paths
@@ -58,20 +62,30 @@ def main():
 
     file_paths = get_file_paths(s3_client, bucket_name, prefix='data/customfield_items/')
 
-    for file_path in file_paths:
-        json_file = get_json_file(s3_client, bucket_name, file_path)
+    if file_paths: # files found, no problems
+        for file_path in file_paths:
+            json_file = get_json_file(s3_client, bucket_name, file_path)
 
-        customfield_items = create_dataframe(json_file)
+            if json_file['results']['customfields'] != []: # check for empty json
+                customfield_items = create_dataframe(json_file)
 
-        template = ', '.join(['%s'] * len(customfield_items.columns))
-        query = '''INSERT INTO customfield_items
-               (active, customfield_id, last_modified, name,
-                      required_customfields, short_code, customfield_item_id)
-                   VALUES ({})'''.format(template)
+                template = ', '.join(['%s'] * len(customfield_items.columns))
+                query = '''INSERT INTO customfield_items
+                              (active, customfield_id, last_modified, name,
+                              required_customfields, short_code, customfield_item_id)
+                           VALUES ({template}, '{date}')
+                           ON CONFLICT(customfield_item_id) DO
+                           UPDATE SET
+                              active = excluded.active, customfield_id = excluded.customfield_id,
+                              last_modified = excluded.last_modified, name = excluded.name,
+                              required_customfields = excluded.required_customfields,
+                              short_code = excluded.short_code,
+                              customfield_item_id = excluded.customfield_item_id'''
+                              .format(template=template, date=str(request_date))
 
-        upload_to_db(conn, customfield_items, query)
+                upload_to_db(conn, customfield_items, query)
 
-        s3_client.delete_object(Bucket=bucket_name, Key=file_path)
+            s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
     conn.close()
 
