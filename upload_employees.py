@@ -73,7 +73,7 @@ def main():
 
         template = ', '.join(['%s'] * len(employees.columns))
         query = '''INSERT INTO employees
-               (active, approved_to, client_url, company_name, created,
+                      (active, approved_to, client_url, company_name, created,
                       customfields, email, email_verified, employee_number, exempt,
                       first_name, group_id, hire_date, last_active, last_modified,
                       last_name, manager_of_group_ids, mobile_number, pay_interval,
