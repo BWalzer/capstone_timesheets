@@ -38,7 +38,7 @@ def navigate_to_timesheet(browser,url,email,password):
 
 
 
-def find_all_date_files():
+def find_all_date_files(browser):
     #finds all filenames but need to transformed to lookup key
     datebox=browser.find_element_by_css_selector('#addon_reports_builder_pay_period_select')
     optiontags=datebox.find_elements_by_css_selector('option')
@@ -64,26 +64,26 @@ def click_download():
     dl_button=browser.find_element_by_css_selector('button#addon_reports_builder_formsubmit_download_sql')
     dl_button.click()
 
-def dl_files():
-    #currently 106 timesheet logs
-    optiontags=find_all_date_files
+def dl_files(optiontags):
+    #currently 108 timesheet logs
     for i in range(len(optiontags)):
         origdate=find_origdate(i, optiontags)
         lookupkey=make_lookup_key(origdate)
         select_file(lookupkey)
         click_download()
         time.sleep(5)
+        print('downloading {}'.format(i))
 
-def uploadfile_tobucket(filename):
-    #need to make directory and organize the files in one place
-    bucket_name='capstone-timesheet-data'
-    foldername='timesheetdata'
+# def uploadfile_tobucket(filename):
+#     #need to make directory and organize the files in one place
+#     bucket_name='capstone-timesheet-data'
+#     foldername='timesheetdata'
+#
+#     s3=boto3.client("s3")
+#     bucketloc='s3://{}/{}'.format(bucket_name, foldername)
+#     aws_base_command='aws s3 sync {}/{}'.format(foldername,filename)
+#     os.system(aws_base_command+" {}".format(bucketloc))
 
-    s3=boto3.client("s3")
-    bucketloc='s3://{}/{}'.format(bucket_name, foldername)
-    aws_base_command='aws s3 sync {}/{}'.format(foldername,filename)
-
-    os.system(aws_base_command+" {}".format(bucketloc))
 
 if __name__ == '__main__':
     #log in and select to get the editlog box open
@@ -94,4 +94,7 @@ if __name__ == '__main__':
     navigate_to_timesheet(browser,url,email,password)
 
     #once log box is open
-    dl_files()
+    optiontags=find_all_date_files(browser)
+    options = webdriver.FirefoxOptions()
+    options.add_argument("download.default_directory=C:/logdownloads")
+    dl_files(optiontags)
