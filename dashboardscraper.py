@@ -58,8 +58,24 @@ def make_lookup_key(origdate):
     return lookupkey
 
 def select_file(lookupkey, browser):
-    mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
-    mySelect.select_by_visible_text(lookupkey)
+    try:
+        time.sleep(2)
+        mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
+        mySelect.select_by_visible_text(lookupkey)
+    except selenium.common.exceptions.NoSuchElementException as error:
+        browser.refresh()
+        report_more=browser.find_element_by_xpath("//div[@id='TT_reports_shortcut']\
+                                          /span[@class='flyout_text more_arrow_label']")
+        report_more.click()
+        time.sleep(1)
+        logging_auditing=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_header_logs']")
+        logging_auditing.click()
+        time.sleep(1)
+        timesheet_log=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_links_logs']\
+            /ul/li[@id='main_menu_time_log']")
+        timesheet_log.click()
+        mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
+
 
 def click_download(browser):
     dl_button=browser.find_element_by_css_selector('button#addon_reports_builder_formsubmit_download_sql')
@@ -84,7 +100,6 @@ def uploadfile_tobucket(filename):
     bucketloc='s3://{}/{}'.format(bucket_name, foldername)
     aws_base_command='aws s3 sync {}/{}'.format(foldername,filename)
     os.system(aws_base_command+" {}".format(bucketloc))
-
 
 if __name__ == '__main__':
     #log in and select to get the editlog box open
