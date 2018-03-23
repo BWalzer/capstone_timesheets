@@ -97,4 +97,6 @@ if __name__ == '__main__':
     optiontags=find_all_date_files(browser)
     options = webdriver.FirefoxOptions()
     options.add_argument("download.default_directory=C:/logdownloads")
+    options.add_argument("--headless")
+    
     dl_files(optiontags)
