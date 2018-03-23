@@ -3,7 +3,7 @@ import os
 from selenium import webdriver
 import selenium
 import time
-from selenium.webdriver import Firefox,Chrome
+from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     options.add_argument("download.default_directory=C:/logdownloads")
     options.add_argument("--headless")
 
-    browser = Firefox()
+    browser = Firefox(firefox_options=options)
     navigate_to_timesheet(browser,url,email,password)
 
     #once log box is open
