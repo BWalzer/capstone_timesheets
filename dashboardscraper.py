@@ -111,7 +111,7 @@ if __name__ == '__main__':
     options.add_argument("--headless")
 
     profile = webdriver.FirefoxProfile()
-    profile.set_preference("browser.helperApps.neverAsk.saveToDisk")
+    profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv")
 
     browser = Firefox(firefox_options=options, firefox_profile=profile)
     navigate_to_timesheet(browser,url,email,password)
