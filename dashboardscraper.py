@@ -3,7 +3,7 @@ import os
 from selenium import webdriver
 import selenium
 import time
-from selenium.webdriver import Firefox
+from selenium.webdriver import Firefox,Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
@@ -56,23 +56,34 @@ def make_lookup_key(origdate):
     lookupkey=startdate+enddate+','+' '+ year
     return lookupkey
 
-def select_file(lookupkey):
+def select_file(lookupkey, browser):
     mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
     mySelect.select_by_visible_text(lookupkey)
 
-def click_download():
+def click_download(browser):
     dl_button=browser.find_element_by_css_selector('button#addon_reports_builder_formsubmit_download_sql')
     dl_button.click()
 
-def dl_files(optiontags):
+def dl_files(optiontags, browser):
     #currently 108 timesheet logs
     for i in range(len(optiontags)):
         origdate=find_origdate(i, optiontags)
         lookupkey=make_lookup_key(origdate)
-        select_file(lookupkey)
-        click_download()
+        select_file(lookupkey, browser)
+        click_download(browser)
         time.sleep(5)
         print('downloading {}'.format(i))
+
+def uploadfile_tobucket(filename):
+    #need to make directory and organize the files in one place
+    bucket_name='capstone-timesheet-data'
+    foldername='timesheetdata'
+
+    s3=boto3.client("s3")
+    bucketloc='s3://{}/{}'.format(bucket_name, foldername)
+    aws_base_command='aws s3 sync {}/{}'.format(foldername,filename)
+    os.system(aws_base_command+" {}".format(bucketloc))
+
 
 # def uploadfile_tobucket(filename):
 #     #need to make directory and organize the files in one place
