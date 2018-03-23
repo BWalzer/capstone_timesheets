@@ -7,6 +7,7 @@ from selenium.webdriver import Firefox,Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
+import random
 
 def login(browser,url,email,password):
     browser.get(url)
@@ -71,7 +72,7 @@ def dl_files(optiontags, browser):
         lookupkey=make_lookup_key(origdate)
         select_file(lookupkey, browser)
         click_download(browser)
-        time.sleep(5)
+        time.sleep(random.randint(5,10))
         print('downloading {}'.format(i))
 
 def uploadfile_tobucket(filename):
@@ -85,24 +86,13 @@ def uploadfile_tobucket(filename):
     os.system(aws_base_command+" {}".format(bucketloc))
 
 
-# def uploadfile_tobucket(filename):
-#     #need to make directory and organize the files in one place
-#     bucket_name='capstone-timesheet-data'
-#     foldername='timesheetdata'
-#
-#     s3=boto3.client("s3")
-#     bucketloc='s3://{}/{}'.format(bucket_name, foldername)
-#     aws_base_command='aws s3 sync {}/{}'.format(foldername,filename)
-#     os.system(aws_base_command+" {}".format(bucketloc))
-
-
 if __name__ == '__main__':
     #log in and select to get the editlog box open
     url='https://capstonesolutions.tsheets.com/page/login'
     email=os.environ['CAPSTONE_EMAIL']
     password=os.environ ['CAPSTONE_PASS']
     options = webdriver.FirefoxOptions()
-    options.add_argument("download.default_directory=C:/logdownloads")
+    #options.add_argument("download.default_directory=C:/logdownloads")
     options.add_argument("--headless")
 
     browser = Firefox(firefox_options=options)
