@@ -90,13 +90,14 @@ if __name__ == '__main__':
     url='https://capstonesolutions.tsheets.com/page/login'
     email=os.environ['CAPSTONE_EMAIL']
     password=os.environ ['CAPSTONE_PASS']
+    options = webdriver.FirefoxOptions()
+    options.add_argument("download.default_directory=C:/logdownloads")
+    options.add_argument("--headless")
+
     browser = Firefox()
     navigate_to_timesheet(browser,url,email,password)
 
     #once log box is open
     optiontags=find_all_date_files(browser)
-    options = webdriver.FirefoxOptions()
-    options.add_argument("download.default_directory=C:/logdownloads")
-    options.add_argument("--headless")
-    
+
     dl_files(optiontags)
