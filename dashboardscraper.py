@@ -107,10 +107,13 @@ if __name__ == '__main__':
     email=os.environ['CAPSTONE_EMAIL']
     password=os.environ ['CAPSTONE_PASS']
     options = webdriver.FirefoxOptions()
-    #options.add_argument("download.default_directory=C:/logdownloads")
+    options.add_argument("download.default_directory=/home/ubuntu/logdownloads")
     options.add_argument("--headless")
 
-    browser = Firefox(firefox_options=options)
+    profile = webdriver.FirefoxProfile()
+    profile.setPreference("browser.helperApps.neverAsk.saveToDisk"
+
+    browser = Firefox(firefox_options=options, firefox_profile=profile)
     navigate_to_timesheet(browser,url,email,password)
 
     #once log box is open
