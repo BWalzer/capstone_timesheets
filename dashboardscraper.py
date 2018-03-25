@@ -41,8 +41,30 @@ def navigate_to_timesheet(browser,url,email,password):
 
 def find_all_date_files(browser):
     #finds all filenames but need to transformed to lookup key
-    datebox=browser.find_element_by_css_selector('#addon_reports_builder_pay_period_select')
-    optiontags=datebox.find_elements_by_css_selector('option')
+    attempts=0
+    while attempts<5:
+        try:
+            time.sleep(random.randint(2,7))
+            datebox=browser.find_element_by_css_selector('#addon_reports_builder_pay_period_select')
+            optiontags=datebox.find_elements_by_css_selector('option')
+            break
+        except selenium.common.exceptions.NoSuchElementException as error:
+            attempt+=1
+            browser.refresh()
+            report_more=browser.find_element_by_xpath("//div[@id='TT_reports_shortcut']\
+                                              /span[@class='flyout_text more_arrow_label']")
+            report_more.click()
+            time.sleep(2)
+            logging_auditing=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_header_logs']")
+            logging_auditing.click()
+            time.sleep(1)
+            timesheet_log=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_links_logs']\
+                /ul/li[@id='main_menu_time_log']")
+            timesheet_log.click()
+
+            datebox=browser.find_element_by_css_selector('#addon_reports_builder_pay_period_select')
+            optiontags=datebox.find_elements_by_css_selector('option')
+
     return optiontags
 
 def find_origdate(num, optiontags):
@@ -120,5 +142,5 @@ if __name__ == '__main__':
     #once log box is open
     optiontags=find_all_date_files(browser)
 
-    #enter in pages 
+    #enter in pages
     dl_files(optiontags[5:], browser)
