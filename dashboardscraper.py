@@ -119,4 +119,4 @@ if __name__ == '__main__':
     #once log box is open
     optiontags=find_all_date_files(browser)
 
-    dl_files(optiontags, browser)
+    dl_files(optiontags[5:], browser)
