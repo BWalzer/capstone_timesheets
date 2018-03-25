@@ -36,7 +36,18 @@ def navigate_to_timesheet(browser,url,email,password):
     timesheet_log.click()
 
 
-
+def refresh_page(browser):
+    browser.refresh()
+    report_more=browser.find_element_by_xpath("//div[@id='TT_reports_shortcut']\
+                                      /span[@class='flyout_text more_arrow_label']")
+    report_more.click()
+    time.sleep(2)
+    logging_auditing=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_header_logs']")
+    logging_auditing.click()
+    time.sleep(1)
+    timesheet_log=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_links_logs']\
+        /ul/li[@id='main_menu_time_log']")
+    timesheet_log.click()
 
 
 def find_all_date_files(browser):
@@ -50,18 +61,8 @@ def find_all_date_files(browser):
             break
         except selenium.common.exceptions.NoSuchElementException as error:
             attempt+=1
-            browser.refresh()
-            report_more=browser.find_element_by_xpath("//div[@id='TT_reports_shortcut']\
-                                              /span[@class='flyout_text more_arrow_label']")
-            report_more.click()
-            time.sleep(2)
-            logging_auditing=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_header_logs']")
-            logging_auditing.click()
-            time.sleep(1)
-            timesheet_log=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_links_logs']\
-                /ul/li[@id='main_menu_time_log']")
-            timesheet_log.click()
-
+            refresh_page(browser)
+            #try again to get the optiontags
             datebox=browser.find_element_by_css_selector('#addon_reports_builder_pay_period_select')
             optiontags=datebox.find_elements_by_css_selector('option')
 
@@ -79,40 +80,38 @@ def make_lookup_key(origdate):
     lookupkey=startdate+enddate+','+' '+ year
     return lookupkey
 
-def select_file(lookupkey, browser):
-    try:
-        time.sleep(random.randint(2,7))
-        mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
-        mySelect.select_by_visible_text(lookupkey)
-    except selenium.common.exceptions.NoSuchElementException as error:
-        browser.refresh()
-        report_more=browser.find_element_by_xpath("//div[@id='TT_reports_shortcut']\
-                                          /span[@class='flyout_text more_arrow_label']")
-        report_more.click()
-        time.sleep(2)
-        logging_auditing=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_header_logs']")
-        logging_auditing.click()
-        time.sleep(1)
-        timesheet_log=browser.find_element_by_xpath("//div[@id='wwTT_reports']/div[@id='report_menu_container']/div/div[@id='section_links_logs']\
-            /ul/li[@id='main_menu_time_log']")
-        timesheet_log.click()
-        #try again to select
-        mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
+def find_selector(browser):
+    attempts=0
+    while attempts<5:
+        try:
+            time.sleep(random.randint(2,7))
+            mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
+            break
+        except selenium.common.exceptions.NoSuchElementException as error:
+            attempt+=1
+            refresh_page(browser)
+            mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
+    return mySelect
 
+def select_file(lookupkey, browser, mySelect):
+    mySelect.select_by_visible_text(lookupkey)
 
 def click_download(browser):
     dl_button=browser.find_element_by_css_selector('button#addon_reports_builder_formsubmit_download_sql')
     dl_button.click()
 
 def dl_files(optiontags, browser):
+    #inserted to allow many tries for the find_element_by_id
+    mySelect=find_selector(browser)
     #currently 108 timesheet logs
     for i in range(len(optiontags)):
         origdate=find_origdate(i, optiontags)
         lookupkey=make_lookup_key(origdate)
-        select_file(lookupkey, browser)
+        select_file(lookupkey, browser, mySelect)
         click_download(browser)
-        time.sleep(random.randint(5,10))
         print('downloading {}'.format(i))
+        time.sleep(random.randint(5,10))
+
 
 def uploadfile_tobucket(filename):
     #need to make directory and organize the files in one place
@@ -130,7 +129,7 @@ if __name__ == '__main__':
     email=os.environ['CAPSTONE_EMAIL']
     password=os.environ ['CAPSTONE_PASS']
     options = webdriver.FirefoxOptions()
-    options.add_argument("download.default_directory=/home/ubuntu/logdownloads")
+    #options.add_argument("download.default_directory=/home/ubuntu/logdownloads")
     options.add_argument("--headless")
 
     profile = webdriver.FirefoxProfile()
