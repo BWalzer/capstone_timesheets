@@ -66,7 +66,7 @@ def main():
         for file_path in file_paths:
             json_file = get_json_file(s3_client, bucket_name, file_path)
             request_date = file_path[23:33]
-
+            print(type(request_date))
             if json_file['results']['customfielditems'] != []: # check for empty json
                 customfield_items = create_dataframe(json_file)
 
@@ -84,7 +84,7 @@ def main():
                               short_code = excluded.short_code,
                               customfield_item_id = excluded.customfield_item_id,
                               last_updated = excluded.last_updated'''
-                              .format(template=template, date=str(request_date)))
+                              .format(template=template, date=request_date))
 
                 upload_to_db(conn, customfield_items, query)
 
