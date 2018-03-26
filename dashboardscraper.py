@@ -8,6 +8,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 import random
+from os import listdir
+from os.path import isfile, join
 
 def login(browser,url,email,password):
     browser.get(url)
@@ -164,6 +166,11 @@ def upload_file_sql(path, conn):
         conn.commit()
     cursor.close()
 
+def get_file_paths():
+    path='../Downloads'
+    allfiles = [f for f in listdir(path) if isfile(join(path, f))]
+    return allfiles
+
 def upload_multiple_file_to_sql():
     db_name = os.environ['CAPSTONE_DB_NAME']
     host = os.environ['CAPSTONE_DB_HOST']
@@ -172,7 +179,10 @@ def upload_multiple_file_to_sql():
 
     conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
 
-    upload_file_sql(path, conn)
+    allfiles=get_file_paths()
+    for file in allfiles:
+        path='../Downloads'+file
+        upload_file_sql(path, conn)
 
 if __name__ == '__main__':
     download_all_logs()
