@@ -183,6 +183,7 @@ def upload_multiple_file_to_sql():
     for file in allfiles:
         path='../Downloads'+file
         upload_file_sql(path, conn)
+        print('uploaded {} to sql database'.format(file))
 
 if __name__ == '__main__':
     upload_multiple_file_to_sql()
