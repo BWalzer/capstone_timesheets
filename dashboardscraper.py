@@ -76,7 +76,7 @@ def make_lookup_key(origdate):
     #convert origdate to actual lookup key to select
     startdate=origdate[5:7]+'/'+origdate[8:10]
     enddate=' '+'-'+' '+origdate[16:18]+'/'+origdate[19:21]
-    year=origdate[0:4]
+    year=origdate[11:15]
     lookupkey=startdate+enddate+','+' '+ year
     return lookupkey
 
@@ -93,7 +93,7 @@ def find_selector(browser):
             mySelect = Select(browser.find_element_by_id("addon_reports_builder_pay_period_select"))
     return mySelect
 
-def select_file(lookupkey, browser, mySelect):
+def select_file(lookupkey, mySelect):
     mySelect.select_by_visible_text(lookupkey)
 
 def click_download(browser):
@@ -107,7 +107,7 @@ def dl_files(optiontags, browser):
     for i in range(len(optiontags)):
         origdate=find_origdate(i, optiontags)
         lookupkey=make_lookup_key(origdate)
-        select_file(lookupkey, browser, mySelect)
+        select_file(lookupkey, mySelect)
         click_download(browser)
         print('downloading {}'.format(i))
         time.sleep(random.randint(5,10))
@@ -142,4 +142,4 @@ if __name__ == '__main__':
     optiontags=find_all_date_files(browser)
 
     #enter in pages
-    dl_files(optiontags[5:], browser)
+    dl_files(optiontags, browser)
