@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import Select
 import random
 from os import listdir
 from os.path import isfile, join
+import psycopg2
 
 def login(browser,url,email,password):
     browser.get(url)
