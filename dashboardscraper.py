@@ -142,4 +142,4 @@ if __name__ == '__main__':
     optiontags=find_all_date_files(browser)
 
     #enter in pages
-    dl_files(optiontags[82:], browser)
+    dl_files(optiontags[100:], browser)
