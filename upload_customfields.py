@@ -84,7 +84,7 @@ def main():
                               required = excluded.required, required_customfields = excluded.required_customfields,
                               short_code = excluded.short_code, type = excluded.type,
                               ui_preference = excluded.ui_preference, customfield_id = excluded.customfield_id,
-                              last_updated = excluded.last_updated'''.format(template=template, last_updated=str(request_date))
+                              last_updated = excluded.last_updated'''.format(template=template, last_updated=request_date)
 
                 upload_to_db(conn, customfields, query)
 

@@ -104,7 +104,7 @@ def main():
                                pto_balances = excluded.pto_balances, require_password_change = excluded.require_password_change,
                                salaried = excluded.salaried, submitted_to = excluded.submitted_to,
                                term_date = excluded.term_date, username = excluded.username,
-                               employee_id = excluded.employee_id, last_updated = excluded.last_updated'''.format(template=template, last_updated=str(request_date))
+                               employee_id = excluded.employee_id, last_updated = excluded.last_updated'''.format(template=template, last_updated=request_date)
 
                 upload_to_db(conn, employees, query)
 
