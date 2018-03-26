@@ -185,4 +185,4 @@ def upload_multiple_file_to_sql():
         upload_file_sql(path, conn)
 
 if __name__ == '__main__':
-    download_all_logs()
+    upload_multiple_file_to_sql()
