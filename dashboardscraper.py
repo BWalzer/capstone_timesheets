@@ -104,12 +104,10 @@ def dl_one_file(optiontag, browser, mySelect):
     origdate=find_origdate(optiontag)
     lookupkey=make_lookup_key(origdate)
 
-    try:
-        select_file(lookupkey, mySelect)
-        click_download(browser)
-    except selenium.common.exceptions.ElementClickInterceptedException:
 
-        click_download(browser)
+    select_file(lookupkey, mySelect)
+    click_download(browser)
+
     print('downloading {}'.format(lookupkey))
     time.sleep(random.randint(5,10))
 
