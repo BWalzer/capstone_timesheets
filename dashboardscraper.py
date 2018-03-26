@@ -150,7 +150,23 @@ def download_all_logs():
     for optiontag in optiontags:
         dl_one_file(optiontag, browser, mySelect)
 
-def upload_file_sql():
+def upload_file_sql(path, conn):
+    with open (path, 'r', newline='') as f:
+        reader = csv.reader(f)
+        columns = next(reader)
+        data=next(reader)
+        query=('''INSERT INTO timesheet_logs
+                (id, gmt_created, local_created, user_id, username, ts_user_id,
+                ts_username, ts_id, edit_type, ip_address, message) VALUES ({})'''
+                .format(','.join(['%s'] * len(columns))))
+
+        cursor = conn.cursor()
+        for data in reader:
+            cursor.execute(query=query, vars=data)
+        conn.commit()
+    cursor.close()
+
+def upload_multiple_file_to_sql():
     db_name = os.environ['CAPSTONE_DB_NAME']
     host = os.environ['CAPSTONE_DB_HOST']
     username = os.environ['CAPSTONE_DB_USERNAME']
@@ -158,6 +174,7 @@ def upload_file_sql():
 
     conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
 
+    upload_file_sql(path, conn)
 
 if __name__ == '__main__':
     download_all_logs()
