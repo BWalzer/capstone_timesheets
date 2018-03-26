@@ -150,7 +150,7 @@ def download_all_logs():
     for optiontag in optiontags:
         dl_one_file(optiontags[105], browser, mySelect)
 
-def upload_file_sql:
+def upload_file_sql():
     db_name = os.environ['CAPSTONE_DB_NAME']
     host = os.environ['CAPSTONE_DB_HOST']
     username = os.environ['CAPSTONE_DB_USERNAME']
