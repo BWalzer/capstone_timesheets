@@ -148,7 +148,7 @@ def download_all_logs():
 
     #enter in pages to limit
     for optiontag in optiontags:
-        dl_one_file(optiontags[105], browser, mySelect)
+        dl_one_file(optiontag, browser, mySelect)
 
 def upload_file_sql():
     db_name = os.environ['CAPSTONE_DB_NAME']
