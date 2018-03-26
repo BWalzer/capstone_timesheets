@@ -68,8 +68,8 @@ def find_all_date_files(browser):
 
     return optiontags
 
-def find_origdate(num, optiontags):
-    origdate=optiontags[num].get_attribute('value')
+def find_origdate(optiontag):
+    origdate=optiontag.get_attribute('value')
     return origdate
 
 def make_lookup_key(origdate):
@@ -100,17 +100,18 @@ def click_download(browser):
     dl_button=browser.find_element_by_css_selector('button#addon_reports_builder_formsubmit_download_sql')
     dl_button.click()
 
-def dl_files(optiontags, browser):
-    #inserted to allow many tries for the find_element_by_id
-    mySelect=find_selector(browser)
-    #currently 108 timesheet logs
-    for i in range(len(optiontags)):
-        origdate=find_origdate(i, optiontags)
-        lookupkey=make_lookup_key(origdate)
+def dl_one_file(optiontag, browser, mySelect):
+    origdate=find_origdate(optiontag)
+    lookupkey=make_lookup_key(origdate)
+
+    try:
         select_file(lookupkey, mySelect)
         click_download(browser)
-        print('downloading {}'.format(i))
-        time.sleep(random.randint(5,10))
+    except selenium.common.exceptions.ElementClickInterceptedException:
+
+        click_download(browser)
+    print('downloading {}'.format(lookupkey))
+    time.sleep(random.randint(5,10))
 
 
 def uploadfile_tobucket(filename):
@@ -123,14 +124,15 @@ def uploadfile_tobucket(filename):
     aws_base_command='aws s3 sync {}/{}'.format(foldername,filename)
     os.system(aws_base_command+" {}".format(bucketloc))
 
-if __name__ == '__main__':
+
+def download_all_logs():
     #log in and select to get the editlog box open
     url='https://capstonesolutions.tsheets.com/page/login'
     email=os.environ['CAPSTONE_EMAIL']
     password=os.environ ['CAPSTONE_PASS']
     options = webdriver.FirefoxOptions()
     options.add_argument("download.default_directory=/home/ubuntu/logdownloads")
-    options.add_argument("--headless")
+    #options.add_argument("--headless")
 
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv")
@@ -141,5 +143,21 @@ if __name__ == '__main__':
     #once log box is open
     optiontags=find_all_date_files(browser)
 
-    #enter in pages
-    dl_files(optiontags[100:], browser)
+    #inserted to allow many tries for the find_element_by_id
+    mySelect=find_selector(browser)
+
+    #enter in pages to limit
+    for optiontag in optiontags:
+        dl_one_file(optiontags[105], browser, mySelect)
+
+def upload_file_sql:
+    db_name = os.environ['CAPSTONE_DB_NAME']
+    host = os.environ['CAPSTONE_DB_HOST']
+    username = os.environ['CAPSTONE_DB_USERNAME']
+    password = os.environ['CAPSTONE_DB_PASSWORD']
+
+    conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
+
+
+if __name__ == '__main__':
+    download_all_logs()
