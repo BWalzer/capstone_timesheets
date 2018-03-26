@@ -168,7 +168,7 @@ def upload_file_sql(path, conn):
     cursor.close()
 
 def get_file_paths():
-    path='../Downloads/'
+    path='../Downloads'
     allfiles = [f for f in listdir(path) if isfile(join(path, f))]
     return allfiles
 
@@ -182,7 +182,7 @@ def upload_multiple_file_to_sql():
 
     allfiles=get_file_paths()
     for file in allfiles:
-        path='../Downloads'+file
+        path='../Downloads/'+file
         upload_file_sql(path, conn)
         print('uploaded {} to sql database'.format(file))
 
