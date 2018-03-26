@@ -131,8 +131,8 @@ def download_all_logs():
     email=os.environ['CAPSTONE_EMAIL']
     password=os.environ ['CAPSTONE_PASS']
     options = webdriver.FirefoxOptions()
-    options.add_argument("download.default_directory=/home/ubuntu/logdownloads")
-    #options.add_argument("--headless")
+    #options.add_argument("download.default_directory=/home/ubuntu/logdownloads")
+    options.add_argument("--headless")
 
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv")
