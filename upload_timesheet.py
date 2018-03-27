@@ -89,7 +89,7 @@ if __name__ == '__main__':
                              (date,duration,end_time,start_time,
                              sheet_id,jobcode_id,last_modified,location,locked,notes,
                              on_the_clock,type,timezone,tz_str,user_id,customfields,attached_files,last_updated)
-                   VALUES ({template}, '{last_updated}')
+                   VALUES ({template}, '{last_updated}')'''.format(template=template, last_updated=request_date)
 
 
 
