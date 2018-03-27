@@ -83,7 +83,13 @@ def main():
             geo_id, latitude, longitude, source, speed, employee_id,
             last_updated)
            VALUES ({}) ON CONFLICT (geo_id)
-           DO UPDATE SET last_updated={}'''.format(template)
+           DO UPDATE SET
+           accuracy=excluded.accuracy, altitude=excluded.altitude,
+           created=excluded.created, device_identifier=excluded.device_identifier,
+           heading=excluded.heading, geo_id=excluded.geo_id, latitude=excluded.latitude,
+           longitude=excluded.longitude, source=excluded.source, speed=excluded.speed,
+           employee_id=excluded.employee_id,last_updated=excluded.last_updated       
+           '''.format(template)
 
         upload_to_db(conn, geo_items, query)
 
