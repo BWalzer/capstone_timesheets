@@ -26,7 +26,6 @@ def get_json_file(s3_client, bucket_name, file_path):
 def create_dataframe(json_file):
     today = str(datetime.date.today())
     df=pd.DataFrame(json_file['results']['geolocations'],index=None).T
-    df['last_updated']=today
     return df
 
 #for periodic uploading
@@ -54,6 +53,7 @@ def uploadlog_tosql(logentry):
 
     cursor.execute(query=querylog, vars=logentry)
     conn.commit()
+    cursor.close()
 
 def main():
     bucket_name = os.environ['CAPSTONE_BUCKET']
@@ -81,11 +81,12 @@ def main():
             geo_id, latitude, longitude, source, speed, employee_id,
             last_updated)
            VALUES ({}) ON CONFLICT (geo_id)
-           DO UPDATE SET last_updated={}'''.format(template, today)
+           DO UPDATE SET last_updated={}'''.format(template)
 
          template = ', '.join(['%s'] * len(geo_items.columns))
 
          upload_to_db(conn, geo_items, query)
+         
          logentry=[page, datetime.datetime.now()]
          uploadlog_tosql(logentry)
          s3_client.delete_object(Bucket=bucket_name, Key=file_path)

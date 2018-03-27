@@ -8,6 +8,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 import random
+from os import listdir
+from os.path import isfile, join
+import psycopg2
+import csv
 
 def login(browser,url,email,password):
     browser.get(url)
@@ -37,6 +41,8 @@ def navigate_to_timesheet(browser,url,email,password):
 
 
 def refresh_page(browser):
+    #if there is an error this refreshes the page and takes you 
+    #back to the desired date selection box
     browser.refresh()
     report_more=browser.find_element_by_xpath("//div[@id='TT_reports_shortcut']\
                                       /span[@class='flyout_text more_arrow_label']")
@@ -104,25 +110,11 @@ def dl_one_file(optiontag, browser, mySelect):
     origdate=find_origdate(optiontag)
     lookupkey=make_lookup_key(origdate)
 
-    try:
-        select_file(lookupkey, mySelect)
-        click_download(browser)
-    except selenium.common.exceptions.ElementClickInterceptedException:
+    select_file(lookupkey, mySelect)
+    click_download(browser)
 
-        click_download(browser)
     print('downloading {}'.format(lookupkey))
     time.sleep(random.randint(5,10))
-
-
-def uploadfile_tobucket(filename):
-    #need to make directory and organize the files in one place
-    bucket_name='capstone-timesheet-data'
-    foldername='timesheetdata'
-
-    s3=boto3.client("s3")
-    bucketloc='s3://{}/{}'.format(bucket_name, foldername)
-    aws_base_command='aws s3 sync {}/{}'.format(foldername,filename)
-    os.system(aws_base_command+" {}".format(bucketloc))
 
 
 def download_all_logs():
@@ -150,7 +142,35 @@ def download_all_logs():
     for optiontag in optiontags:
         dl_one_file(optiontag, browser, mySelect)
 
-def upload_file_sql():
+def upload_file_sql(path, conn):
+    with open (path, 'r', newline='') as f:
+        reader = csv.reader(f)
+        columns = next(reader)
+        data=next(reader)
+        query=('''INSERT INTO timesheet_logs
+                (id, gmt_created, local_created, user_id, username, ts_user_id,
+                ts_username, ts_id, edit_type, ip_address, message) VALUES ({})
+                ON CONFLICT (id) DO
+                UPDATE SET
+                    id=excluded.id, gmt_created=excluded.gmt_created,
+                    local_created=excluded.local_created, user_id=excluded.user_id,
+                    ts_user_id=excluded.ts_user_id, ts_username=excluded.ts_username,
+                    ts_id=excluded.ts_id, edit_type=excluded.edit_type,
+                    ip_address=excluded.ip_address, message=excluded.message'''
+                    .format(','.join(['%s'] * len(columns))))
+
+        cursor = conn.cursor()
+        for data in reader:
+            cursor.execute(query=query, vars=data)
+        conn.commit()
+    cursor.close()
+
+def get_file_paths():
+    path='../Downloads'
+    allfiles = [f for f in listdir(path) if isfile(join(path, f))]
+    return allfiles
+
+def upload_multiple_file_to_sql():
     db_name = os.environ['CAPSTONE_DB_NAME']
     host = os.environ['CAPSTONE_DB_HOST']
     username = os.environ['CAPSTONE_DB_USERNAME']
@@ -158,6 +178,11 @@ def upload_file_sql():
 
     conn = psycopg2.connect(database=db_name, user=username, host=host, password=password)
 
+    allfiles=get_file_paths()
+    for file in allfiles:
+        path='../Downloads/'+file
+        upload_file_sql(path, conn)
+        print('uploaded {} to sql database'.format(file))
 
 if __name__ == '__main__':
-    download_all_logs()
+    upload_multiple_file_to_sql()
