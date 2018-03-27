@@ -11,6 +11,7 @@ import random
 from os import listdir
 from os.path import isfile, join
 import psycopg2
+import csv
 
 def login(browser,url,email,password):
     browser.get(url)
