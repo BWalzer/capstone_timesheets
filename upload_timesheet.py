@@ -90,6 +90,15 @@ if __name__ == '__main__':
                              sheet_id,jobcode_id,last_modified,location,locked,notes,
                              on_the_clock,type,timezone,tz_str,user_id,customfields,attached_files,last_updated)
                    VALUES ({template}, '{last_updated}')
+                   ON CONFLICT(sheet_id) DO
+                   UPDATE SET
+                       date = excluded.date, end_time = excluded.end_time,
+                       start_time = excluded.start_time, sheet_id = excluded.sheet_id,
+                       jobcode_id = excluded.jobcode_id, last_modified = excluded.last_modified,
+                       location=excluded.location,locked=excluded.locked,notes=excluded.notes,
+                       on_the_clock=excluded.on_the_clock,type=excluded.type,timezone=excluded.timezone, tz_str=excluded.tz_str,
+                       user_id=excluded.user_id,customfields=excluded.customfields,attached_files=excluded.attached_files,last_updated=excluded.
+                       last_updated'''.format(template=template, last_updated=request_date)
 
 
 
