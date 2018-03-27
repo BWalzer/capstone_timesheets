@@ -85,12 +85,11 @@ def main():
            VALUES ({}) ON CONFLICT (geo_id)
            DO UPDATE SET last_updated={}'''.format(template)
 
+           upload_to_db(conn, geo_items, query)
 
-         upload_to_db(conn, geo_items, query)
-
-         logentry=[page, datetime.datetime.now()]
-         uploadlog_tosql(logentry)
-         s3_client.delete_object(Bucket=bucket_name, Key=file_path)
+           logentry=[page, datetime.datetime.now()]
+           uploadlog_tosql(logentry)
+           s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
     conn.close()
 
