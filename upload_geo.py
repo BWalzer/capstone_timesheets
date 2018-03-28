@@ -75,7 +75,7 @@ def main():
         json_file = get_json_file(s3_client, bucket_name, file_path)
 
         request_date=file_path[18:28]
-        
+
         geo_items = create_dataframe(json_file)
 
         template = ', '.join(['%s'] * len(geo_items.columns))
@@ -90,7 +90,7 @@ def main():
            heading=excluded.heading, geo_id=excluded.geo_id, latitude=excluded.latitude,
            longitude=excluded.longitude, source=excluded.source, speed=excluded.speed,
            employee_id=excluded.employee_id,last_updated=excluded.last_updated
-           '''.format(template=template, last_updated=)
+           '''.format(template=template, last_updated=request_date)
 
         upload_to_db(conn, geo_items, query)
 
