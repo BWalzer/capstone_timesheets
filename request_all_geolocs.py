@@ -3,6 +3,7 @@ import requests
 import time
 import datetime
 import boto3
+import random
 #This is a script for mass uploading to all geolocation data
 
 def request_page(page_number, header, last_mod_date):
@@ -18,7 +19,7 @@ def request_page(page_number, header, last_mod_date):
             return True, response
         print('\t bad status code: {}. attempt {} of 5'.format(response.status_code, attempts))
 
-        time.sleep(5)
+        time.sleep(5+random.randint(5,10))
     print('\t skipping page {}: failed 5 times'.format(page_number))
     return False, response
 
@@ -44,6 +45,7 @@ def main():
     s3_client = boto3.client('s3')
     today = str(datetime.date.today())
 
+    #change page numbers as needed
     page_number = 1
     while True:
         status, response = request_page(page_number, header, last_date)
