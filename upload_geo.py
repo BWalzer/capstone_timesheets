@@ -94,7 +94,6 @@ def main():
 
         upload_to_db(conn, geo_items, query)
 
-        uploadlog_tosql(logentry)
         s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
     conn.close()
