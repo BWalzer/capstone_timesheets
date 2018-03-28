@@ -11,11 +11,23 @@ import datetime
 #reference date in the filename
 
 def get_file_paths(s3_client, bucket_name, prefix):
+    #structured to take 1000 at a time (s3 API limit)
+    #gets the next one and appends it
     print('\t getting all file_paths')
-    bucket_contents = s3_client.list_objects(Bucket=bucket_name, Prefix=prefix)
+    file_paths=[]
 
-    file_paths = [x['Key'] for x in bucket_contents['Contents']]
-    return file_paths
+    kwargs={'Bucket': bucket_name, 'Prefix': prefix}
+    while True:
+        bucket_contents = s3_client.list_objects_v2(**kwargs)
+        file_paths.append([x['Key'] for x in bucket_contents['Contents']])
+
+        try:
+            kwargs['ContinuationToken']=bucket_contents['NextContinuationToken']
+        except KeyError:
+            break
+    #flattens the file_paths
+    file_path_list=[file for pages in file_paths for file in pages]
+    return file_path_list
 
 def get_json_file(s3_client, bucket_name, file_path):
     print('\t getting the json file')
