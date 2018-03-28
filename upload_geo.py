@@ -74,22 +74,23 @@ def main():
     for file_path in file_paths:
         json_file = get_json_file(s3_client, bucket_name, file_path)
 
+        request_date=file_path[18:28]
+        
         geo_items = create_dataframe(json_file)
 
         template = ', '.join(['%s'] * len(geo_items.columns))
 
         query = '''INSERT INTO geo
             (accuracy, altitude, created, device_identifier, heading,
-            geo_id, latitude, longitude, source, speed, employee_id,
-            last_updated)
-           VALUES ({}) ON CONFLICT (geo_id)
+            geo_id, latitude, longitude, source, speed, employee_id, last_updated)
+           VALUES ({template}, '{last_updated}') ON CONFLICT (geo_id)
            DO UPDATE SET
            accuracy=excluded.accuracy, altitude=excluded.altitude,
            created=excluded.created, device_identifier=excluded.device_identifier,
            heading=excluded.heading, geo_id=excluded.geo_id, latitude=excluded.latitude,
            longitude=excluded.longitude, source=excluded.source, speed=excluded.speed,
-           employee_id=excluded.employee_id,last_updated=excluded.last_updated       
-           '''.format(template)
+           employee_id=excluded.employee_id,last_updated=excluded.last_updated
+           '''.format(template=template, last_updated=)
 
         upload_to_db(conn, geo_items, query)
 
