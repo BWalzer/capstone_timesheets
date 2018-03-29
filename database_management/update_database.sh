@@ -1,4 +1,4 @@
-cd ~/Documents/capstone_timesheets/database_management
+cd ~/capstone_timesheets/database_management
 # python request_new_timesheet.py 1>../logs/timesheets.log 2>>../logs/timesheets.log
 python request_new_customfield_items.py 1>../logs/customfield_items.log  2>>../logs/customfield_items.log
 # python request_new_geo.py 1>../logs/geo.log 2>>../logs/geo.log
