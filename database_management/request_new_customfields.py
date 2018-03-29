@@ -12,7 +12,7 @@ def request_page(page_number, header, modified_since):
               'value_type': 'both',
               'applies_to': 'all',
               'page': page_number,
-              'modified_since', modified_since + 'T00:00:00-00:00'}
+              'modified_since': modified_since + 'T00:00:00-00:00'}
     print('requesting customfields page {}'.format(page_number))
     attempts = 0
     while attempts < 5:
