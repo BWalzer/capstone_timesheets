@@ -141,8 +141,7 @@ def download_all_logs():
     for optiontag in optiontags[:10]:
         dl_one_file(optiontag, browser, mySelect)
 
-def upload_to_s3(content, bucket_name, s3_client):
-    path = 'data/timesheet_logs/'
+def upload_to_s3(content, bucket_name, s3_client, path):
     s3_client.put_object(Bucket=bucket_name, Key=path, Body=content)
 
 def get_file_paths():
@@ -153,6 +152,7 @@ def get_file_paths():
 
 if __name__ == '__main__':
     bucket_name = os.environ['CAPSTONE_BUCKET']
+    s3_client = boto3.client('s3')
 
     download_all_logs()
 
@@ -161,4 +161,10 @@ if __name__ == '__main__':
     for file in allfiles:
         #takes file from ec2 to s3 bucket
         filepath='../Downloads'+file
-        upload_to_s3(file, bucket_name, s3_client)
+
+        with open(filepath, 'r') as f:
+            contents=f.read()
+            path = 'data/timesheet_logs/'+file
+            upload_to_s3(contents, bucket_name, s3_client, path)
+            print('uploaded log {}'.format(file))
+            os.remove(filepath)
