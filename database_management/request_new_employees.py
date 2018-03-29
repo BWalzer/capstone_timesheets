@@ -6,14 +6,17 @@ import boto3
 import psycopg2
 
 
-def request_page(page_number, header, last_updated):
-    url = 'https://rest.tsheets.com/api/v1/users?active=both&page={}&modified_since={}T00:00:00%2B00:00'.format(page_number, last_updated)
-    print('url: {}'.format(url))
+def request_page(page_number, header, modified_since):
+    url = 'https://rest.tsheets.com/api/v1/users'
+    params = {'active': 'both',
+              'page': page_number,
+              'modified_since': modified_since+'T00:00:00-00:00'}
+
     print('requesting employees page {}'.format(page_number))
 
     attempts = 0
     while attempts < 5:
-        response = requests.get(url, headers=header)
+        response = requests.get(url, headers=header, params=params)
         attempts += 1
         if response.status_code == 200:
             return True, response
@@ -62,6 +65,7 @@ def main():
 
         page_number += 1
 
+    conn.close()
 
 if __name__ == '__main__':
     main()

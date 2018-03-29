@@ -6,12 +6,16 @@ import boto3
 
 
 def request_page(page_number, header):
-    url = 'https://rest.tsheets.com/api/v1/customfields?active=both&value_type=both&applies_to=all&page={}'.format(page_number)
+    url = 'https://rest.tsheets.com/api/v1/customfields'
+    params = {'active': 'both',
+              'value_type': 'both',
+              'applies_to': 'all',
+              'page': page_number}
     print('requesting customfields page {}'.format(page_number))
 
     attempts = 0
     while attempts < 5:
-        response = requests.get(url, headers=header)
+        response = requests.get(url, headers=header, params=params)
         attempts += 1
         if response.status_code == 200:
             return True, response
@@ -48,7 +52,6 @@ def main():
             break
 
         page_number += 1
-
 
 if __name__ == '__main__':
     main()

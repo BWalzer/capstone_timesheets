@@ -6,12 +6,14 @@ import boto3
 
 
 def request_page(page_number, header):
-    url = 'https://rest.tsheets.com/api/v1/users?active=both&page={}'.format(page_number)
+    url = 'https://rest.tsheets.com/api/v1/users'
+    params = {'page': page_number,
+              'active': 'both'}
     print('requesting employees page {}'.format(page_number))
 
     attempts = 0
     while attempts < 5:
-        response = requests.get(url, headers=header)
+        response = requests.get(url, headers=header, params=params)
         attempts += 1
         if response.status_code == 200:
             return True, response
