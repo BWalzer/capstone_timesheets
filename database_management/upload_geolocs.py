@@ -56,7 +56,7 @@ def upload_to_db(conn, df, query):
         conn.commit()
     cursor.close()
 
-def uploadlog_tosql(logentry):
+def uploadlog_tosql(conn, logentry):
     cursor = conn.cursor()
     template = ', '.join(['%s'] * len(logentry))
     querylog = '''INSERT INTO geolog
@@ -107,8 +107,8 @@ def main():
         upload_to_db(conn, geo_items, query)
 
         logentry=[request_date, file_path]
-        uploadlog_tosql(logentry)
-        
+        uploadlog_tosql(conn, logentry)
+
         s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
     conn.close()
