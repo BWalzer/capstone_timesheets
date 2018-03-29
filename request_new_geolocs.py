@@ -70,7 +70,7 @@ def main():
             break
 
         page_number += 1
-
+    conn.close()
 
 if __name__ == '__main__':
     main()
