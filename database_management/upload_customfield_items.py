@@ -66,7 +66,6 @@ def main():
         for file_path in file_paths:
             json_file = get_json_file(s3_client, bucket_name, file_path)
             request_date = file_path[23:33]
-            print(type(request_date))
             if json_file['results']['customfielditems'] != []: # check for empty json
                 customfield_items = create_dataframe(json_file)
 
