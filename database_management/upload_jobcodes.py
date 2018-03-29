@@ -25,6 +25,7 @@ def create_dataframe(json_file):
     print('\t creating dataframe')
     jobcodes = pd.DataFrame(json_file['results']['jobcodes']).T
 
+    print(jobcodes.columns)
     jobcodes['jobcode_id'] = jobcodes['id']
     jobcodes.drop(columns=['id'], inplace=True)
 
@@ -62,28 +63,29 @@ def main():
         json_file = get_json_file(s3_client, bucket_name, file_path)
 
         last_updated = file_path[14:24]
-        jobcodes = create_dataframe(json_file)
+        if json_file['results']['jobcodes'] != []: # check for empty response
+            jobcodes = create_dataframe(json_file)
 
-        template = ', '.join(['%s'] * len(jobcodes.columns))
-        query = ('''INSERT INTO jobcodes
-                       (active, assigned_to_all, billable, billable_rate, created,
-                       filtered_customfielditems, has_children, last_modified,
-                       locations, name, parent_id, required_customfields, short_code,
-                       type, jobcode_id, last_updated)
-                   VALUES ({template}, '{last_updated}')
-                   ON CONFLICT(jobcode_id) DO
-                   UPDATE SET
-                       active = excluded.active, assigned_to_all = excluded.assigned_to_all,
-                       billable = excluded.billable, billable_rate = excluded.billable_rate,
-                       created = excluded.created, filtered_customfielditems = excluded.filtered_customfielditems,
-                       has_children = excluded.has_children, last_modified = excluded.last_modified,
-                       locations = excluded.locations, name = excluded.name,
-                       parent_id = excluded.parent_id, required_customfields = excluded.required_customfields,
-                       short_code = excluded.short_code, type = excluded.type,
-                       jobcode_id = excluded.jobcode_id, last_updated = excluded.last_updated'''
-                       .format(template=template, last_updated=last_updated))
+            template = ', '.join(['%s'] * len(jobcodes.columns))
+            query = ('''INSERT INTO jobcodes
+                           (active, assigned_to_all, billable, billable_rate, created,
+                           filtered_customfielditems, has_children, last_modified,
+                           locations, name, parent_id, required_customfields, short_code,
+                           type, jobcode_id, last_updated)
+                       VALUES ({template}, '{last_updated}')
+                       ON CONFLICT(jobcode_id) DO
+                       UPDATE SET
+                           active = excluded.active, assigned_to_all = excluded.assigned_to_all,
+                           billable = excluded.billable, billable_rate = excluded.billable_rate,
+                           created = excluded.created, filtered_customfielditems = excluded.filtered_customfielditems,
+                           has_children = excluded.has_children, last_modified = excluded.last_modified,
+                           locations = excluded.locations, name = excluded.name,
+                           parent_id = excluded.parent_id, required_customfields = excluded.required_customfields,
+                           short_code = excluded.short_code, type = excluded.type,
+                           jobcode_id = excluded.jobcode_id, last_updated = excluded.last_updated'''
+                           .format(template=template, last_updated=last_updated))
 
-        upload_to_db(conn, jobcodes, query)
+            upload_to_db(conn, jobcodes, query)
 
         s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
