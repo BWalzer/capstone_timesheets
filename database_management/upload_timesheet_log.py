@@ -3,6 +3,7 @@ from os import listdir
 from os.path import isfile, join
 import psycopg2
 import csv
+import boto3
 
 def get_file_paths(s3_client, bucket_name, prefix):
     print('\t getting all file_paths')
