@@ -44,3 +44,5 @@ python ../database_management/upload_timesheet.py 1>>../logs/database.log 2>>../
 
 echo "@@@ uploading timesheet logs @@@" >> ../logs/database.log
 python ../database_management/upload_timesheet_log.py 1>>../logs/database.log 2>>../logs/database.log
+
+echo "####### END #######" >>../logs/database.log
