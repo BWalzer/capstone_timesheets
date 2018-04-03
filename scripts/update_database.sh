@@ -1,4 +1,4 @@
-source /users/ubuntu/.bashrc
+source /home/ubuntu/.bashrc
 
 echo "#######" $(date) "#######" >> ../logs/database.log
 
