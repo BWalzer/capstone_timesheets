@@ -25,7 +25,6 @@ def create_dataframe(json_file):
     print('\t creating dataframe')
     jobcodes = pd.DataFrame(json_file['results']['jobcodes']).T
 
-    print(jobcodes.columns)
     jobcodes['jobcode_id'] = jobcodes['id']
     jobcodes.drop(columns=['id'], inplace=True)
 

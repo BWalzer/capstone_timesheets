@@ -1,8 +1,9 @@
-
+import os
 from os import listdir
 from os.path import isfile, join
 import psycopg2
 import csv
+import boto3
 
 def get_file_paths(s3_client, bucket_name, prefix):
     print('\t getting all file_paths')
@@ -30,22 +31,22 @@ def upload_file_sql(file_path, conn):
     #     reader = csv.reader(f)
     #     columns = next(reader)
     #     data=next(reader)
-        query=('''INSERT INTO timesheet_logs
-                (id, gmt_created, local_created, user_id, username, ts_user_id,
-                ts_username, ts_id, edit_type, ip_address, message) VALUES ({})
-                ON CONFLICT (id) DO
-                UPDATE SET
-                    id=excluded.id, gmt_created=excluded.gmt_created,
-                    local_created=excluded.local_created, user_id=excluded.user_id,
-                    ts_user_id=excluded.ts_user_id, ts_username=excluded.ts_username,
-                    ts_id=excluded.ts_id, edit_type=excluded.edit_type,
-                    ip_address=excluded.ip_address, message=excluded.message'''
-                    .format(','.join(['%s'] * len(columns))))
+    query=('''INSERT INTO timesheet_logs
+            (id, gmt_created, local_created, user_id, username, ts_user_id,
+            ts_username, ts_id, edit_type, ip_address, message) VALUES ({})
+            ON CONFLICT (id) DO
+            UPDATE SET
+                id=excluded.id, gmt_created=excluded.gmt_created,
+                local_created=excluded.local_created, user_id=excluded.user_id,
+                ts_user_id=excluded.ts_user_id, ts_username=excluded.ts_username,
+                ts_id=excluded.ts_id, edit_type=excluded.edit_type,
+                ip_address=excluded.ip_address, message=excluded.message'''
+                .format(','.join(['%s'] * len(columns))))
 
-        cursor = conn.cursor()
-        for data in reader:
-            cursor.execute(query=query, vars=data)
-        conn.commit()
+    cursor = conn.cursor()
+    for data in reader:
+        cursor.execute(query=query, vars=data)
+    conn.commit()
     cursor.close()
 
 
