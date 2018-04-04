@@ -147,7 +147,7 @@ def upload_to_s3(content, bucket_name, s3_client, path):
 def get_file_paths():
     #get's all file names in the downloads folder
     path='/home/ubuntu/Downloads'
-    allfiles = [f for f in os.listdir(path) if os.isfile(join(path, f))]
+    allfiles = [f for f in os.listdir(path) if os.path.isfile(join(path, f))]
     return allfiles
 
 if __name__ == '__main__':
