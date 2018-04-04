@@ -1,3 +1,27 @@
+--ERROR queries
+SELECT COUNT(DISTINCT(ts_id)) from timesheet_logs
+WHERE username IN ('bwalzer@capstoneemail.com','mwright2013@yahoo.com')
+AND message LIKE ('%Changed clock-in%')
+OR message LIKE ('%Total time worked changed%')
+OR message LIKE ('%Changed clock-out%')
+;
+
+SELECT CAST(duration/3600 as FLOAT) as hours,
+CASE WHEN timesheets.sheet_id IN
+(SELECT ts_id from timesheet_logs
+WHERE username IN ('bwalzer@capstoneemail.com','mwright2013@yahoo.com')
+AND message LIKE ('%Changed clock-in%')
+OR message LIKE ('%Total time worked changed%')
+OR message LIKE ('%Changed clock-out%')) THEN 1
+ELSE 0
+END as error
+FROM timesheets;
+
+
+
+
+
+--Geoqueries
 --Function
 CREATE OR REPLACE FUNCTION distance(lat1 FLOAT, lon1 FLOAT, lat2 FLOAT, lon2 FLOAT) RETURNS FLOAT AS $$
 DECLARE
@@ -9,15 +33,10 @@ END
 $$ LANGUAGE plpgsql;
 
 
---example queries for getting distance traveled for a specific
+--example queries for getting distance traveled for a specific employee
 
-SELECT distance(x.latitude, x.longitude, y.latitude, y.longitude)
-FROM (select latitude, longitude from geo
-WHERE employee_id=404389 AND created in ('2016-05-16 14:30:30')) as x,
-(SELECT latitude, longitude from geo
-WHERE employee_id=404389 AND created in ('2016-05-17 22:08:06')) as y;
-
-SELECT *, lead(latitude,1) over (order by created) as difflat, lead(longitude,1) over (order by created)
+SELECT *, lead(latitude,1) over (order by created) as difflat, lead(longitude,1)
+over (order by created)
 as difflon,
 distance(latitude, longitude, (lead(latitude,1) over (order by created)),
 (lead(longitude,1) over (order by created)))
