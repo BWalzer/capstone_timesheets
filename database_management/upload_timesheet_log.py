@@ -5,6 +5,7 @@ import psycopg2
 import csv
 import boto3
 from io import StringIO
+import pandas as pd
 
 def get_file_paths(s3_client, bucket_name, prefix):
     print('\t getting all file_paths')
