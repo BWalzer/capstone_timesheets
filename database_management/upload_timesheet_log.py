@@ -72,8 +72,7 @@ def main():
             df=get_timesheet_csv(s3_client, bucket_name, file_path)
             upload_file_sql(df, conn)
             print('{} has been uploaded'.format(file_path))
-
-    #s3_client.delete_object(Bucket=bucket_name, Key=file_path)
+            s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
 if __name__ == '__main__':
     main()
