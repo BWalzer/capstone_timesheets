@@ -49,7 +49,7 @@ def upload_file_sql(df, conn):
 
     cursor = conn.cursor()
     for row in df.iterrows():
-        cursor.execute(query=query, vars=data)
+        cursor.execute(query=query, vars=row)
     conn.commit()
     cursor.close()
 
