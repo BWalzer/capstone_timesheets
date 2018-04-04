@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     for file in allfiles:
         #takes file from ec2 to s3 bucket
-        filepath='../Downloads'+file
+        filepath='/home/ubuntu/Downloads/'+file
 
         with open(filepath, 'r') as f:
             contents=f.read()
