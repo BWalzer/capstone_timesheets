@@ -4,6 +4,7 @@ from os.path import isfile, join
 import psycopg2
 import csv
 import boto3
+from io import StringIO
 
 def get_file_paths(s3_client, bucket_name, prefix):
     print('\t getting all file_paths')
@@ -15,19 +16,21 @@ def get_file_paths(s3_client, bucket_name, prefix):
 
     file_paths = [x['Key'] for x in bucket_contents['Contents']]
 
-    return file_paths
+    return file_paths[1:]
 
 
-def get_timesheet_csv(s3_client, bucke_name, file_path):
+def get_timesheet_csv(s3_client, bucket_name, file_path):
     #pulls from s3 bucket and reads the file to pandas
-    response = s3_client.get_object(Bucket=bucket_name, Key=file_path)
-    csvfile = csv.loads(response.read())
-    return csvfile
+    csvobj = s3_client.get_object(Bucket=bucket_name, Key=file_path)
+    body=csvobj['Body']
+    csvstr=body.read().decode('utf-8')
+    df=pd.read_csv(StringIO(csvstr))
+    return df
 
-def upload_file_sql(file_path, conn):
+def upload_file_sql(df, conn):
 
     #for uploading csvs saved on ec2
-    # with open (path, 'r', newline='') as f:
+    #with open (path, 'r', newline='') as f:
     #     reader = csv.reader(f)
     #     columns = next(reader)
     #     data=next(reader)
@@ -41,21 +44,16 @@ def upload_file_sql(file_path, conn):
                 ts_user_id=excluded.ts_user_id, ts_username=excluded.ts_username,
                 ts_id=excluded.ts_id, edit_type=excluded.edit_type,
                 ip_address=excluded.ip_address, message=excluded.message'''
-                .format(','.join(['%s'] * len(columns))))
+                .format(','.join(['%s'] * len(df.columns))))
 
     cursor = conn.cursor()
-    for data in reader:
+    for row in df.iterrows():
         cursor.execute(query=query, vars=data)
     conn.commit()
     cursor.close()
 
-
-def upload_multiple_file_to_sql(conn, file_paths):
-    for file in file_paths:
-        upload_file_sql(path, conn)
-        print('uploaded {} to sql database'.format(file))
-
 def main():
+
     bucket_name = os.environ['CAPSTONE_BUCKET']
 
     db_name = os.environ['CAPSTONE_DB_NAME']
@@ -68,7 +66,13 @@ def main():
 
     file_paths = get_file_paths(s3_client, bucket_name, prefix='data/timesheet_logs/')
 
+    if file_paths: # file paths found, continue
+        for file_path in file_paths:
+            df=get_timesheet_csv(s3_client, bucket_name, file_path)
+            upload_file_sql(df, conn)
+            print('{} has been uploaded'.format(file_path))
 
+    #s3_client.delete_object(Bucket=bucket_name, Key=file_path)
 
 if __name__ == '__main__':
     main()
