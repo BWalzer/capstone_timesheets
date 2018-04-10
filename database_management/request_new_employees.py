@@ -59,7 +59,8 @@ def main():
         print('\t has more: {}'.format(response.json()['more']))
         if status: # good status, continue with data uploading
             upload_to_s3(response, bucket_name, s3_client, page_number, today)
-
+        else: # bad status
+            print('\t\t bad status code: {}'.format(response.status_code))
         if not response.json()['more']:
             break
 
